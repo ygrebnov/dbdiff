@@ -13,11 +13,12 @@ Yaroslav Grebnov
 
 **homebrew tap**
 ```shell
-brew install dbdiff/tap/dbdiff
+brew install ygrebnov/tap/dbdiff
 ```
 
 **homebrew**
 ```shell
+brew tap ygrebnov/tap
 brew install dbdiff
 ```
 
