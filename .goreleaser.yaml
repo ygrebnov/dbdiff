@@ -49,6 +49,7 @@ brews:
   - tap:
       owner: ygrebnov
       name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     folder: Formula
     goarm: "7"
     commit_author:
