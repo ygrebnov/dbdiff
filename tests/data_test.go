@@ -1,14 +1,12 @@
 package tests
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/ygrebnov/testutils/docker"
 	"github.com/ygrebnov/testutils/presets"
 
-	"github.com/ygrebnov/dbdiff/dbdiff"
-	"github.com/ygrebnov/dbdiff/models"
+	"github.com/ygrebnov/dbdiff/entity/field"
 )
 
 var (
@@ -24,17 +22,13 @@ var (
 	mockPostgresDB2      = newMockDatabase(dbTypePostgresql, &postgres2Container, &postgresPort2, "")
 	mockSqliteDB1        = newMockDatabase(dbTypeSqlite, nil, nil, "test/db1")
 	mockSqliteDB2        = newMockDatabase(dbTypeSqlite, nil, nil, "test/db2")
-	mockIDField          = models.Field{Name: "mock_id_field", FieldType: "text", PrimaryKey: true, Attrs: "primary key"}
-	mockTextField        = models.Field{Name: "mock_text_field", FieldType: "text", PrimaryKey: false, Attrs: "not null"}
-	mockText2Field       = models.Field{Name: "mock_text2_field", FieldType: "text", PrimaryKey: false, Attrs: "not null"}
-	mockBooleanField     = models.Field{Name: "mock_boolean_field", FieldType: "boolean", PrimaryKey: false, Attrs: "not null"}
-	mockTimestampField   = models.Field{Name: "mock_timestamp_field", FieldType: "timestamp", PrimaryKey: false, Attrs: "not null default current_timestamp"}
-	mockFields           = []*models.Field{&mockIDField, &mockTextField, &mockBooleanField, &mockTimestampField}
-	mockFields5          = []*models.Field{&mockIDField, &mockTextField, &mockBooleanField, &mockTimestampField, &mockText2Field}
-	mockV0Ctx            = context.Background()
-	mockV1Ctx            = context.WithValue(context.Background(), dbdiff.VerboseContextKey, true)
-	mockV2Ctx            = context.WithValue(context.Background(), dbdiff.VVerboseContextKey, true)
-	mockV3Ctx            = context.WithValue(context.Background(), dbdiff.VVVerboseContextKey, true)
+	mockIDField          = field.Field{Name: "mock_id_field", FieldType: "text", IsPrimaryKey: true, Attrs: "primary key"}
+	mockTextField        = field.Field{Name: "mock_text_field", FieldType: "text", IsPrimaryKey: false, Attrs: "not null"}
+	mockText2Field       = field.Field{Name: "mock_text2_field", FieldType: "text", IsPrimaryKey: false, Attrs: "not null"}
+	mockBooleanField     = field.Field{Name: "mock_boolean_field", FieldType: "boolean", IsPrimaryKey: false, Attrs: "not null"}
+	mockTimestampField   = field.Field{Name: "mock_timestamp_field", FieldType: "timestamp", IsPrimaryKey: false, Attrs: "not null default current_timestamp"}
+	mockFields           = []*field.Field{&mockIDField, &mockTextField, &mockBooleanField, &mockTimestampField}
+	mockFields5          = []*field.Field{&mockIDField, &mockTextField, &mockBooleanField, &mockTimestampField, &mockText2Field}
 	tbDiffsEqual         = []tableDifferences{
 		{
 			2,

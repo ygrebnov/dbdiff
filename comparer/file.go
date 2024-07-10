@@ -1,4 +1,4 @@
-package dbdiff
+package comparer
 
 import (
 	"bufio"
@@ -8,41 +8,38 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ygrebnov/dbdiff/models"
+	databasePkg "github.com/ygrebnov/dbdiff/entity/database"
 )
 
-// Represents a type capable of comparing two databases as files. Implements [Comparer] interface.
-type fileComparer struct{}
+// file is a type capable of comparing two databases as files.
+type file struct {
+	f1, f2 string
+}
+
+// removePrefixes returns given string without database identifying prefixes.
+func removePrefixes(s string) string {
+	s = strings.TrimPrefix(s, databasePkg.Sqlite+":")
+	s = strings.TrimPrefix(s, databasePkg.Postgresql+":")
+
+	return s
+}
 
 // NewFileComparer creates a new fileComparer.
-func NewFileComparer() Comparer {
-	return &fileComparer{}
+func NewFileComparer(resource1, resource2 string) Comparer {
+	return &file{f1: removePrefixes(resource1), f2: removePrefixes(resource2)}
 }
 
-func (fc *fileComparer) parse(s string, e any) {
-	raw, _ := e.(*string)
-	// Remove database type prefix from file path
-	for _, t := range []models.DatabaseType{sqlite, postgresql} {
-		*raw = strings.Replace(s, t.Name()+":", "", 1)
-	}
-}
-
-func (fc *fileComparer) Compare(_ context.Context, s1 string, s2 string) {
-	var fp1, fp2 string
+func (f *file) Compare(_ context.Context) {
 	equal := true // Comparison result holder
 
-	// Parse database identifiers
-	fc.parse(s1, &fp1)
-	fc.parse(s2, &fp2)
-
 	// Open files
-	file1, err := os.OpenFile(s1, os.O_RDONLY, os.ModePerm)
+	file1, err := os.OpenFile(f.f1, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		log.Panicln("Error opening file:", err)
 	}
 	defer file1.Close()
 
-	file2, err := os.OpenFile(s2, os.O_RDONLY, os.ModePerm)
+	file2, err := os.OpenFile(f.f2, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		log.Panicln("Error opening file:", err)
 	}
