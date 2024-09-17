@@ -11,7 +11,7 @@ import (
 
 	"github.com/ygrebnov/testutils/docker"
 
-	"github.com/ygrebnov/dbdiff/models"
+	"github.com/ygrebnov/dbdiff/entity/field"
 )
 
 const (
@@ -23,6 +23,11 @@ COMMIT;`
 	dbTypeSqlite     = "sqlite"
 )
 
+type mockTable struct {
+	Name   string
+	Fields []*field.Field
+}
+
 // mockTableData holds mocked table data.
 type mockTableData struct {
 	Name   string
@@ -30,7 +35,7 @@ type mockTableData struct {
 }
 
 type mockDatabase struct {
-	Tables    []models.Table
+	Tables    []mockTable
 	Data      []mockTableData
 	DBType    string
 	Handler   *sql.DB
@@ -112,7 +117,7 @@ type dataDifferences = difference[string]
 type tableDifferences struct {
 	rowsNum int // maximum number of rows in a table
 	exists
-	defaultFields []*models.Field           // default fields in a table
+	defaultFields []*field.Field            // default fields in a table
 	fields        map[int]exists            // field index in defaultFields -> whether a field exists in table
 	fieldTypes    map[int]schemaDifferences // field index in defaultFields -> field types differences
 	fieldAttrs    map[int]schemaDifferences // field index in defaultFields -> field attributes differences
@@ -133,14 +138,14 @@ func generateDatabases(diffs databaseDifferences, db1 *mockDatabase, db2 *mockDa
 	for t := 0; t < diffs.tablesNum; t++ {
 		tableName := "table" + strconv.Itoa(t)
 		tableDiff := diffs.tablesDifferences[t]
-		table1 := models.Table{Name: tableName}
-		table2 := models.Table{Name: tableName}
+		table1 := mockTable{Name: tableName}
+		table2 := mockTable{Name: tableName}
 
 		// add fields to tables
 		for f := 0; f < len(tableDiff.defaultFields); f++ {
 			fieldTemplate := tableDiff.defaultFields[f]
-			field1 := models.Field{Name: fieldTemplate.Name}
-			field2 := models.Field{Name: fieldTemplate.Name}
+			field1 := field.Field{Name: fieldTemplate.Name}
+			field2 := field.Field{Name: fieldTemplate.Name}
 			if fieldTypeDiff, exists := tableDiff.fieldTypes[f]; exists {
 				field1.FieldType = fieldTypeDiff.inD1
 				field2.FieldType = fieldTypeDiff.inD2

@@ -1,42 +1,17 @@
-package dbdiff
+package query
 
 import (
 	"fmt"
 	"strings"
-	"unicode"
-
-	"github.com/ygrebnov/dbdiff/models"
 )
 
-// postgresqlDatabase defines methods applicable to a PostgreSQL database. Implements [models.DatabaseType] interface.
-type postgresqlDatabase struct{}
+type postgresql struct{}
 
-// newPostgresqlDatabase returns a new postgresqlDatabase object.
-func newPostgresqlDatabase() models.DatabaseType {
-	return &postgresqlDatabase{}
+func NewPostgresqlQuery() Schema {
+	return &postgresql{}
 }
 
-func (*postgresqlDatabase) Name() string {
-	return "postgres"
-}
-
-func (*postgresqlDatabase) Driver() string {
-	return "postgres"
-}
-
-func (*postgresqlDatabase) Parse(table *models.Table) {
-	for _, field := range strings.Split(table.Schema, ",") {
-		field = strings.TrimFunc(
-			strings.ToLower(field),
-			func(r rune) bool { return unicode.IsSpace(r) || unicode.IsPunct(r) },
-		)
-		if len(field) > 0 {
-			table.AddField(field)
-		}
-	}
-}
-
-func (*postgresqlDatabase) QueryAll() string {
+func (*postgresql) All() string {
 	return `SELECT 
     table_name AS name, 
     string_agg(column_name || ' ' || data_type || ' ' || COALESCE(constraint_type, ''), ', ' order by column_name) AS sql
@@ -56,7 +31,7 @@ FROM (
 GROUP BY table_name;`
 }
 
-func (*postgresqlDatabase) QueryOne(name string) string {
+func (*postgresql) One(name string) string {
 	return fmt.Sprintf(`SELECT 
 	    STRING_AGG(
 			column_name || ' ' || data_type || ' ' || COALESCE(constraint_type, ''), 
@@ -77,7 +52,7 @@ func (*postgresqlDatabase) QueryOne(name string) string {
 		WHERE table_schema = 'public' AND table_name = '%s') comb;`, name, name)
 }
 
-func (*postgresqlDatabase) QueryExcluded(names []string) string {
+func (*postgresql) Excluded(names []string) string {
 	var suffix string
 	if len(names) > 0 {
 		suffix = fmt.Sprintf(" AND table_name NOT IN (%s)", strings.Join(names, ","))
@@ -87,4 +62,4 @@ func (*postgresqlDatabase) QueryExcluded(names []string) string {
 	WHERE table_schema = 'public'%s;`, suffix)
 }
 
-var postgresql = newPostgresqlDatabase()
+var Postgresql = NewPostgresqlQuery()
