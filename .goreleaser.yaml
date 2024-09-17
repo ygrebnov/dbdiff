@@ -1,3 +1,4 @@
+version: 2
 before:
   hooks:
     - go mod tidy
@@ -38,7 +39,7 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 changelog:
   sort: asc
   filters:
@@ -46,11 +47,10 @@ changelog:
       - '^vendor:'
       - '^tests:'
 brews:
-  - tap:
+  - repository:
       owner: ygrebnov
       name: homebrew-tap
       token: "{{ .Env.TAP_GITHUB_TOKEN }}"
-    folder: Formula
     goarm: "7"
     commit_author:
       name: ygrebnov
